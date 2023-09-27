@@ -1,7 +1,7 @@
 ## Hi,there! 
 
 
-I'm magichear, a student of USTC. I like everything that Interests me.
+I'm magichear, a student of USTC.
 
 - WebSite: ???
 - Blog: ???
