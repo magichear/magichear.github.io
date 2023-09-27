@@ -7,8 +7,8 @@ I'm magichear, a student of USTC. I like everything that Interests me.
 - Blog: ???
 - QQ Group： ???
 
-[![](https://data.jsdelivr.com/v1/package/gh/kaygb/magichear/badge)](https://www.jsdelivr.com/package/gh/magichear/magichear)
-[![](https://img.shields.io/github/license/kaygb/kaygb)](https://github.com/kaygb/kaygb/blob/master/LICENSE)
+[![](https://data.jsdelivr.com/v1/package/gh/magichear/magichear/badge)](https://www.jsdelivr.com/package/gh/magichear/magichear)
+[![](https://img.shields.io/github/license/magichear/magichear)](https://github.com/magichear/magichear/blob/master/LICENSE)
 
 
 
