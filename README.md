@@ -7,7 +7,7 @@ I'm magichear, a student of USTC.
 - Blog: ???
 - QQ Group： ???
 
-![magichear's Github stats](https://github-readme-stats.vercel.app/api?username=magichear&show_icons=true&theme=tokyonight)
+[![](https://data.jsdelivr.com/v1/package/gh/magichear/magichear/badge)](https://www.jsdelivr.com/package/gh/magichear/magichear)
 [![](https://img.shields.io/github/license/magichear/magichear)](https://github.com/magichear/magichear/blob/master/LICENSE)
 
 
