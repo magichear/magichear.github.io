@@ -3,7 +3,8 @@ name: Auto Update Bing Images CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: "45 13 * * *"
+    # 每10天执行一次
+    - cron: "45 13 */10 * *"
   push:
     branches: [ gh-pages ]
   pull_request:
