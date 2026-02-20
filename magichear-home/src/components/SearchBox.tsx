@@ -39,18 +39,85 @@ const ENGINES: SearchEngine[] = [
 
 const STORAGE_KEY = "preferred-search-engine";
 
-/** 构建 OpenSearch 风格的搜索建议 URL */
-function buildSuggestUrl(engine: SearchEngine, query: string): string | null {
+/* ─── JSONP 辅助（绕过 CORS） ─── */
+function jsonpFetch(rawUrl: string, timeout = 4000): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const cb = `__sg_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement("script");
+    let settled = false;
+
+    const cleanup = () => {
+      settled = true;
+      delete (window as any)[cb];
+      if (script.parentNode) script.remove();
+    };
+
+    (window as any)[cb] = (data: unknown) => {
+      if (settled) return;
+      cleanup();
+      resolve(data);
+    };
+
+    script.src = rawUrl.replace("__CB__", cb);
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("jsonp-error"));
+    };
+    document.head.appendChild(script);
+
+    setTimeout(() => {
+      if (!settled) {
+        cleanup();
+        reject(new Error("jsonp-timeout"));
+      }
+    }, timeout);
+  });
+}
+
+/* ─── 每引擎的 JSONP 建议配置 ─── */
+interface SuggestConfig {
+  url: string;
+  parse: (data: unknown) => string[];
+}
+
+/** Google gws-wiz 格式: ["q",[["s1",r,[t],...],...],...] */
+const parseGws = (data: unknown): string[] => {
+  if (!Array.isArray(data) || !Array.isArray(data[1])) return [];
+  return data[1]
+    .map((item: unknown) => (Array.isArray(item) ? String(item[0]) : ""))
+    .filter(Boolean)
+    .slice(0, 8);
+};
+
+/** OpenSearch JSON 格式: ["q",["s1","s2",...]] */
+const parseOpenSearch = (data: unknown): string[] => {
+  if (!Array.isArray(data) || !Array.isArray(data[1])) return [];
+  return data[1].map(String).slice(0, 8);
+};
+
+function buildSuggestConfig(
+  engine: SearchEngine,
+  query: string
+): SuggestConfig {
   const q = encodeURIComponent(query);
   switch (engine.id) {
-    case "yandex":
-      return `https://suggest.yandex.com/suggest-ff.cgi?part=${q}&uil=zh`;
     case "bing":
-      return `https://api.bing.com/osjson.aspx?query=${q}`;
+      return {
+        url: `https://api.bing.com/osjson.aspx?query=${q}&JsonType=callback&JsonCallback=__CB__`,
+        parse: parseOpenSearch,
+      };
     case "google":
-      return `https://www.google.com/complete/search?client=firefox&q=${q}`;
+      return {
+        url: `https://www.google.com/complete/search?q=${q}&client=gws-wiz&callback=__CB__`,
+        parse: parseGws,
+      };
+    case "yandex":
     default:
-      return null;
+      // Yandex suggest 不支持 JSONP，复用 Google 建议
+      return {
+        url: `https://www.google.com/complete/search?q=${q}&client=gws-wiz&callback=__CB__`,
+        parse: parseGws,
+      };
   }
 }
 
@@ -71,16 +138,16 @@ export default function SearchBox({ className = "" }: SearchBoxProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestVisible, setSuggestVisible] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
-  const [focused, setFocused] = useState(false);
 
   /* ── refs ── */
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const requestIdRef = useRef(0);
 
   const engine = ENGINES[engineIdx];
-  const isActive = focused || query.length > 0 || engineOpen || suggestVisible;
+  /* 仅在有实际输入内容时才激活背景（不含单纯聚焦） */
+  const isActive = query.length > 0;
   const hasSuggestions = suggestVisible && suggestions.length > 0;
 
   /* ── 点击外部关闭 ── */
@@ -98,7 +165,7 @@ export default function SearchBox({ className = "" }: SearchBoxProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ── 搜索建议 (debounce + abort) ── */
+  /* ── 搜索建议 (debounce + JSONP) ── */
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -108,24 +175,19 @@ export default function SearchBox({ className = "" }: SearchBoxProps) {
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      abortRef.current?.abort();
-      const ctrl = new AbortController();
-      abortRef.current = ctrl;
-      const url = buildSuggestUrl(engine, query);
-      if (!url) return;
+      const id = ++requestIdRef.current;
+      const config = buildSuggestConfig(engine, query);
 
-      fetch(url, { signal: ctrl.signal })
-        .then((r) => r.json())
+      jsonpFetch(config.url)
         .then((data) => {
-          // OpenSearch JSON: ["query", ["s1","s2",...]]
-          if (Array.isArray(data) && Array.isArray(data[1])) {
-            setSuggestions(data[1].slice(0, 8));
-            setSuggestVisible(true);
-            setActiveIdx(-1);
-          }
+          if (requestIdRef.current !== id) return; // 过期请求，丢弃
+          const results = config.parse(data);
+          setSuggestions(results);
+          setSuggestVisible(results.length > 0);
+          setActiveIdx(-1);
         })
         .catch(() => {
-          /* CORS / network — 静默降级 */
+          /* JSONP 失败 — 静默降级 */
         });
     }, 250);
 
@@ -232,10 +294,8 @@ export default function SearchBox({ className = "" }: SearchBoxProps) {
               if (e.target.value) setSuggestVisible(true);
             }}
             onFocus={() => {
-              setFocused(true);
-              if (suggestions.length > 0) setSuggestVisible(true);
+              if (suggestions.length > 0 && query.trim()) setSuggestVisible(true);
             }}
-            onBlur={() => setTimeout(() => setFocused(false), 200)}
             onKeyDown={handleKeyDown}
           />
           {query.length > 0 && (
