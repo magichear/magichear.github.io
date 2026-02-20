@@ -1,0 +1,45 @@
+/**
+ * USTC (中国科学技术大学) 校徽字体图标
+ * 子集化自「全国高校校徽图标字体库」 by 封尘 (https://lovefc.cn)
+ * 原项目: https://github.com/lovefc/china_school_badge
+ * 原项目协议: Apache-2.0
+ * 仅保留 U+E025 (ustc) 单个字形，用作头像翻转卡片背面水印
+ */
+
+@font-face {
+  font-family: "ustc-badge";
+  src:
+    url("../assets/ustc-badge.woff2") format("woff2"),
+    url("../assets/ustc-badge.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+/* 在 .info-back 上叠加 USTC 校徽作为半透明水印 */
+.ih-item.circle.effect .info .info-back {
+  position: relative;
+  overflow: hidden;
+}
+
+.ih-item.circle.effect .info .info-back::before {
+  content: "\e025";
+  font-family: "ustc-badge" !important;
+  position: absolute;
+  top: 39%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 150px;
+  color: rgba(255, 255, 255, 0.281);
+  pointer-events: none;
+  line-height: 1;
+  speak: never;
+  z-index: 0;
+}
+
+/* 确保文字内容在水印之上 */
+.ih-item.circle.effect .info .info-back h2,
+.ih-item.circle.effect .info .info-back p {
+  position: relative;
+  z-index: 1;
+}
