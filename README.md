@@ -15,6 +15,8 @@
 
 > 借鉴了[北岛向南的小屋](https://javef.github.io/)的头像样式
 
+> 使用了[全国高校校徽图标字体库](https://github.com/lovefc/china_school_badge)中的ustc字体
+
 ### 注
 
 - 使用了 [一言](http://hitokoto.cn/) 的 API 服务
@@ -48,15 +50,27 @@
     - `https://unpkg.com/klevenna-image@2.0.2/.......`
   - 开始作为我的浏览器首页/导航页
   - 搜索框使用资源：
-    - `./assets/css/search-box.css`
-    - `./assets/js/search-box.js`
+    - ~~`./assets/css/search-box.css`~~
+      - `magichear-home\src\styles\search-box.css`
+    - ~~`./assets/js/search-box.js`~~
+      - `magichear-home\src\components\SearchBox.tsx`
+
+---
+
+- 2026-02-20
+  - 使用vite6-react-ts完成项目重写，呈现效果基本保持一致
+  - 集成 USTC 校徽字体水印（头像翻转卡片背面）
+    - 子集化自 [全国高校校徽图标字体库](https://github.com/lovefc/china_school_badge)（Apache-2.0）
+    - 仅保留 `.fc-icon-ustc`（U+E025）单个字形，woff2 ≈ 4 KB
 
 ### 更新计划
 
-- 2024-06-08
-  - 有想法将背景替换为动态
-    - 目前尚未找到合适的源
-      - Bing 的壁纸会经常更新，但都是静态的
-    - 暂无合适的替换思路
-  - 希望为搜索框添加自由更换搜索引擎的功能
-    - 暂时没想到怎么在不影响美观的情况下触发事件
+~~- 2024-06-08~~
+~~  - 有想法将背景替换为动态~~
+~~    - 目前尚未找到合适的源~~
+~~      - Bing 的壁纸会经常更新，但都是静态的~~
+~~    - 暂无合适的替换思路~~
+~~  - 希望为搜索框添加自由更换搜索引擎的功能~~
+~~    - 暂时没想到怎么在不影响美观的情况下触发事件~~
+
+随缘，毕业了，不干前端
