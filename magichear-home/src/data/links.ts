@@ -15,35 +15,23 @@ export interface SocialLink {
 
 export const navigationLinks: NavLink[] = [
   { text: "首页", href: "/" },
-  { text: "油猴", href: "https://greasyfork.org/zh-CN", external: true },
-  {
-    text: "简历",
-    href: "https://magichear.github.io/intruduction/",
-    external: true,
-  },
   {
     text: "学习",
     href: "https://magichear.github.io/study/",
     external: true,
   },
-  { text: "四十三", href: "https://magichear.github.io/43/", external: true },
-  {
-    text: "趣玩",
-    href: "https://magichear.github.io/interesting/",
-    external: true,
-  },
+  { text: "环高分布", href: "https://1zio1.github.io/", external: true },
   {
     text: "关于",
-    href: "https://magichear.github.io/magichear/",
+    href: "https://github.com/magichear",
     external: true,
   },
   { text: "bilibili", href: "https://www.bilibili.com/", external: true },
-  { text: "vlab", href: "https://vlab.ustc.edu.cn/", external: true },
-  { text: "jwc", href: "https://www.teach.ustc.edu.cn/", external: true },
-  { text: "LARS", href: "https://jyjsxx.github.io/", external: true },
-  { text: "Mail", href: "https://mail.ustc.edu.cn", external: true },
+  { text: "豆包", href: "https://www.doubao.com/", external: true },
+  { text: "GPT", href: "https://chatgpt.com/", external: true },
   { text: "力扣", href: "https://leetcode.com/", external: true },
-  { text: "环高分布", href: "https://1zio1.github.io/", external: true },
+  { text: "Civitai", href: "https://civitai.com/", external: true },
+  { text: "魔搭", href: "https://www.modelscope.cn/", external: true },
 ];
 
 export const socialLinks: SocialLink[] = [

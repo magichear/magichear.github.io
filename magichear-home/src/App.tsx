@@ -10,9 +10,18 @@ const DEFAULT_HITOKOTO = {
   from: "林若溪&杨辰",
 };
 
+const MOBILE_NAV_MEDIA = "(max-width: 960px)";
+
 function App() {
   const panelRef = useRef<HTMLElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobileNav, setIsMobileNav] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia(MOBILE_NAV_MEDIA).matches;
+  });
   const [hitokoto, setHitokoto] = useState(DEFAULT_HITOKOTO);
 
   // ---- Bing 壁纸背景 ----
@@ -66,6 +75,30 @@ function App() {
     });
   }, []);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_NAV_MEDIA);
+
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobileNav(event.matches);
+
+      if (!event.matches) {
+        setMenuOpen(false);
+      }
+    };
+
+    handleChange(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
   // ---- 头像加载完成 ----
   const handleAvatarLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -76,8 +109,12 @@ function App() {
 
   // ---- 移动端菜单切换 ----
   const toggleMenu = useCallback(() => {
+    if (!isMobileNav) {
+      return;
+    }
+
     setMenuOpen((prev) => !prev);
-  }, []);
+  }, [isMobileNav]);
 
   return (
     <>
@@ -142,8 +179,10 @@ function App() {
 
               {/* 导航区域 */}
               <div
-                className={`navigation-wrapper iUp ${
-                  menuOpen ? "visible animated bounceInDown" : ""
+                className={`navigation-wrapper ${
+                  isMobileNav ? "" : "iUp"
+                } ${
+                  isMobileNav && menuOpen ? "visible animated bounceInDown" : ""
                 }`}
               >
                 {/* 主导航 */}
