@@ -37,7 +37,7 @@ export const navigationLinks: NavLink[] = [
 export const socialLinks: SocialLink[] = [
   {
     icon: "icon-github",
-    href: "https://github.com/magichear/magichear",
+    href: "https://github.com/magichear",
     title: "github",
   },
   {
